@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Infra Docs Generator</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="layout">
+
+    <header class="site-header">
+      <div class="header-inner">
+        <div class="header-brand">
+          <svg class="header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M5.25 14.25h13.5m-13.5 0a3 3 0 01-3-3m3 3a3 3 0 100 6h13.5a3 3 0 100-6m-13.5 0v-1.5m13.5 1.5v-1.5m0 0a3 3 0 01-3-3m3 3H8.25m3.75-4.5V6.375a3.375 3.375 0 00-3.375-3.375H6a3.375 3.375 0 00-3.375 3.375v14.25" />
+          </svg>
+          <span class="header-title">Infra Docs Generator</span>
+        </div>
+        <p class="header-desc">Analyze infrastructure-as-code. Get structured, actionable documentation.</p>
+      </div>
+    </header>
+
+    <main class="main">
+
+      <section class="input-card">
+        <div class="input-tabs" role="tablist">
+          <button class="tab-btn active" data-tab="paste" role="tab" aria-selected="true">Paste config</button>
+          <button class="tab-btn" data-tab="upload" role="tab" aria-selected="false">Upload files</button>
+        </div>
+
+        <div class="tab-panel" id="panel-paste">
+          <textarea
+            id="config-input"
+            spellcheck="false"
+            placeholder="Paste your Terraform, Kubernetes YAML, Docker Compose, or config file here..."
+          ></textarea>
+        </div>
+
+        <div class="tab-panel hidden" id="panel-upload">
+          <div class="upload-zone" id="upload-zone" tabindex="0" role="button" aria-label="Upload files">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="upload-icon">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+            </svg>
+            <p class="upload-label">Drop files here or <span class="upload-link">click to browse</span></p>
+            <p class="upload-hint">Supports .tf, .yaml, .yml, .json, .toml, .conf, Dockerfile &mdash; select multiple</p>
+            <input type="file" id="file-input" multiple accept=".tf,.yaml,.yml,.json,.toml,.conf,.ini,.env,Dockerfile,dockerfile" />
+          </div>
+          <div class="file-list hidden" id="file-list">
+            <div class="file-list-header">
+              <span class="file-list-count" id="file-list-count"></span>
+              <button class="file-remove" id="file-remove" aria-label="Clear files">Clear</button>
+            </div>
+            <ul class="file-name-list" id="file-name-list"></ul>
+          </div>
+        </div>
+
+        <div class="examples-row">
+          <span class="examples-label">Examples</span>
+          <button class="example-btn" data-example="kubernetes">Kubernetes microservice stack</button>
+          <button class="example-btn" data-example="terraform">Terraform AWS infra</button>
+          <button class="example-btn" data-example="docker-compose">Docker Compose app</button>
+        </div>
+
+        <div class="actions-row">
+          <button class="analyze-btn" id="analyze-btn">
+            <span class="btn-text">Analyze</span>
+            <span class="btn-spinner hidden" aria-hidden="true"></span>
+          </button>
+          <div class="error-msg hidden" id="error-msg" role="alert"></div>
+        </div>
+      </section>
+
+      <section class="results hidden" id="results" aria-live="polite">
+
+        <div class="results-meta" id="results-meta"></div>
+
+        <div class="results-body">
+
+          <div class="result-block" id="block-summary">
+            <h2 class="block-title">Architecture Summary</h2>
+            <p class="block-text" id="architecture-summary"></p>
+          </div>
+
+          <div class="result-block" id="block-documentation">
+            <h2 class="block-title">Documentation</h2>
+            <div class="block-prose" id="documentation"></div>
+          </div>
+
+          <div class="result-block" id="block-services">
+            <h2 class="block-title">Services</h2>
+            <div class="services-grid" id="services-grid"></div>
+          </div>
+
+          <div class="two-col">
+
+            <div class="result-block" id="block-integrations">
+              <h2 class="block-title">External Integrations</h2>
+              <ul class="tag-list" id="integrations-list"></ul>
+            </div>
+
+            <div class="result-block" id="block-risks">
+              <h2 class="block-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="title-icon risk-icon">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                </svg>
+                Risks
+              </h2>
+              <ul class="risk-list" id="risks-list"></ul>
+            </div>
+
+          </div>
+
+          <div class="result-block" id="block-runbook">
+            <h2 class="block-title">Runbook Notes</h2>
+            <ul class="runbook-list" id="runbook-list"></ul>
+          </div>
+
+          <div class="result-block" id="block-json">
+            <div class="json-header">
+              <h2 class="block-title">Structured JSON</h2>
+              <button class="copy-btn" id="copy-json-btn">Copy</button>
+            </div>
+            <pre class="json-output" id="json-output"></pre>
+          </div>
+
+        </div>
+      </section>
+
+    </main>
+
+    <footer class="site-footer">
+      Built by <a href="https://github.com/andreidirlau" target="_blank" rel="noopener">Andrei Dirlau</a>
+    </footer>
+
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
